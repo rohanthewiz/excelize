@@ -427,7 +427,7 @@ func (f *File) drawBarChart(formatSet *formatChart) *cPlotArea {
 	}
 	if formatSet.Type == "barStacked" {
 		c.Grouping.Val = "stacked"
-		c.Overlap.Val = 100
+		c.Overlap = &attrValInt{ Val: 100 }
 	}
 	catAx := f.drawPlotAreaCatAx()
 	valAx := f.drawPlotAreaValAx()
