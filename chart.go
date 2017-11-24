@@ -133,16 +133,17 @@ func parseFormatChartSet(formatSet string) *formatChart {
 //
 // The following shows the type of chart supported by excelize:
 //
-//     Type     | Chart
-//    ----------+----------------
-//     bar      | bar chart
-//     bar3D    | 3D bar chart
-//     doughnut | doughnut chart
-//     line     | line chart
-//     pie      | pie chart
-//     pie3D    | 3D pie chart
-//     radar    | radar chart
-//     scatter  | scatter chart
+//     Type       | Chart
+//    ------------+----------------
+//     bar        | bar chart
+//     barStacked | stacked bar chart
+//     bar3D      | 3D bar chart
+//     doughnut   | doughnut chart
+//     line       | line chart
+//     pie        | pie chart
+//     pie3D      | 3D pie chart
+//     radar      | radar chart
+//     scatter    | scatter chart
 //
 // In Excel a chart series is a collection of information that defines which data is plotted such as values, axis labels and formatting.
 //
@@ -405,7 +406,7 @@ func (f *File) addChart(formatSet *formatChart) {
 	f.saveFileList(media, string(chart))
 }
 
-// drawBarChart provides function to draw the c:plotArea element for bar and
+// drawBarChart provides function to draw the c:plotArea element for bar, barStacked and
 // bar3D chart by given format sets.
 func (f *File) drawBarChart(formatSet *formatChart) *cPlotArea {
 	c := cCharts{
