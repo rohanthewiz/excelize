@@ -431,7 +431,7 @@ func (f *File) drawBarChart(formatSet *formatChart) *cPlotArea {
 		c.Overlap = &attrValInt{Val: 100}
 	}
 	catAx := f.drawPlotAreaCatAx()
-	valAx := f.drawPlotAreaValAx()
+	valAx := f.drawPlotAreaValAx(formatSet)
 	charts := map[string]*cPlotArea{
 		"bar": {
 			BarChart: &c,
@@ -488,7 +488,7 @@ func (f *File) drawLineChart(formatSet *formatChart) *cPlotArea {
 			},
 		},
 		CatAx: f.drawPlotAreaCatAx(),
-		ValAx: f.drawPlotAreaValAx(),
+		ValAx: f.drawPlotAreaValAx(formatSet),
 	}
 }
 
@@ -537,7 +537,7 @@ func (f *File) drawRadarChart(formatSet *formatChart) *cPlotArea {
 			},
 		},
 		CatAx: f.drawPlotAreaCatAx(),
-		ValAx: f.drawPlotAreaValAx(),
+		ValAx: f.drawPlotAreaValAx(formatSet),
 	}
 }
 
@@ -560,7 +560,7 @@ func (f *File) drawScatterChart(formatSet *formatChart) *cPlotArea {
 			},
 		},
 		CatAx: f.drawPlotAreaCatAx(),
-		ValAx: f.drawPlotAreaValAx(),
+		ValAx: f.drawPlotAreaValAx(formatSet),
 	}
 }
 
@@ -608,7 +608,17 @@ func (f *File) drawChartSeriesSpPr(i int, formatSet *formatChart) *cSpPr {
 			},
 		},
 	}
-	chartSeriesSpPr := map[string]*cSpPr{Bar: nil, BarStacked: nil, Bar3D: nil, Doughnut: nil, Line: spPrLine, Pie: nil, Pie3D: nil, Radar: nil, Scatter: spPrScatter}
+	var spPrBar *cSpPr
+	// Use per-chart theme colors if provided
+	if ln := len(formatSet.ThemeColors); ln > 0 {
+		j := i % ln
+		spPrBar = &cSpPr{
+			SolidFill: &aSolidFill{
+				SrgbClr: &attrValString{Val: formatSet.ThemeColors[j]},
+			},
+		}
+	}
+	chartSeriesSpPr := map[string]*cSpPr{Bar: spPrBar, BarStacked: spPrBar, Bar3D: nil, Doughnut: nil, Line: spPrLine, Pie: nil, Pie3D: nil, Radar: nil, Scatter: spPrScatter}
 	return chartSeriesSpPr[formatSet.Type]
 }
 
@@ -767,29 +777,42 @@ func (f *File) drawPlotAreaCatAx() []*cAxs {
 }
 
 // drawPlotAreaCatAx provides function to draw the c:valAx element.
-func (f *File) drawPlotAreaValAx() []*cAxs {
-	return []*cAxs{
-		{
-			AxID: &attrValInt{Val: 753999904},
-			Scaling: &cScaling{
-				Orientation: &attrValString{Val: "minMax"},
-			},
-			Delete: &attrValBool{Val: false},
-			AxPos:  &attrValString{Val: "l"},
-			NumFmt: &cNumFmt{
-				FormatCode:   "General",
-				SourceLinked: true,
-			},
-			MajorTickMark: &attrValString{Val: "none"},
-			MinorTickMark: &attrValString{Val: "none"},
-			TickLblPos:    &attrValString{Val: "nextTo"},
-			SpPr:          f.drawPlotAreaSpPr(),
-			TxPr:          f.drawPlotAreaTxPr(),
-			CrossAx:       &attrValInt{Val: 754001152},
-			Crosses:       &attrValString{Val: "autoZero"},
-			CrossBetween:  &attrValString{Val: "between"},
-		},
+func (f *File) drawPlotAreaValAx(formatSet *formatChart) []*cAxs {
+	numFmt := "General"
+	if formatSet.YAxis.NumFormat != "" {
+		numFmt = formatSet.YAxis.NumFormat
 	}
+	cAx := &cAxs{
+		AxID: &attrValInt{Val: 753999904},
+		Scaling: &cScaling{
+			Orientation: &attrValString{Val: "minMax"},
+		},
+		Delete: &attrValBool{Val: false},
+		AxPos:  &attrValString{Val: "l"},
+		NumFmt: &cNumFmt{
+			FormatCode: numFmt, // e.g. "#,##0"
+			SourceLinked: false,
+		},
+		MajorTickMark: &attrValString{Val: "none"},
+		MinorTickMark: &attrValString{Val: "none"},
+		TickLblPos:    &attrValString{Val: "nextTo"},
+		SpPr:          f.drawPlotAreaSpPr(),
+		TxPr:          f.drawPlotAreaTxPr(),
+		CrossAx:       &attrValInt{Val: 754001152},
+		Crosses:       &attrValString{Val: "autoZero"},
+		CrossBetween:  &attrValString{Val: "between"},
+	}
+	if formatSet.YAxis.DisplayUnits != "" {
+		displayUnitsLabel := ""
+		if formatSet.YAxis.DisplayUnitsVisible {
+			displayUnitsLabel = "1"
+		}
+		cAx.DisplayUnits = &cDisplayUnits{
+				BuiltInUnit: &attrValString{Val: formatSet.YAxis.DisplayUnits},
+				DisplayUnitsLabel: displayUnitsLabel,
+		}
+	}
+	return []*cAxs{cAx}
 }
 
 // drawPlotAreaSpPr provides function to draw the c:spPr element.
