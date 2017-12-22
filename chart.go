@@ -805,7 +805,17 @@ func (f *File) drawChartSeriesSpPr(i int, formatSet *formatChart) *cSpPr {
 			},
 		},
 	}
-	chartSeriesSpPr := map[string]*cSpPr{Bar: nil, BarStacked: nil, BarPercentStacked: nil, Bar3DClustered: nil, Bar3DStacked: nil, Bar3DPercentStacked: nil, Col: nil, ColStacked: nil, ColPercentStacked: nil, Col3DClustered: nil, Col3D: nil, Col3DStacked: nil, Col3DPercentStacked: nil, Doughnut: nil, Line: spPrLine, Pie: nil, Pie3D: nil, Radar: nil, Scatter: spPrScatter}
+	var spPrBar *cSpPr
+	// Use per-chart theme colors if provided
+	if ln := len(formatSet.ThemeColors); ln > 0 {
+		j := i % ln
+		spPrBar = &cSpPr{
+			SolidFill: &aSolidFill{
+				SrgbClr: &attrValString{Val: formatSet.ThemeColors[j]},
+			},
+		}
+	}
+	chartSeriesSpPr := map[string]*cSpPr{Bar: spPrBar, BarStacked: spPrBar, BarPercentStacked: nil, Bar3DClustered: nil, Bar3DStacked: nil, Bar3DPercentStacked: nil, Col: nil, ColStacked: nil, ColPercentStacked: nil, Col3DClustered: nil, Col3D: nil, Col3DStacked: nil, Col3DPercentStacked: nil, Doughnut: nil, Line: spPrLine, Pie: nil, Pie3D: nil, Radar: nil, Scatter: spPrScatter}
 	return chartSeriesSpPr[formatSet.Type]
 }
 
@@ -973,6 +983,7 @@ func (f *File) drawPlotAreaCatAx(formatSet *formatChart) []*cAxs {
 	}
 }
 
+
 // drawPlotAreaValAx provides function to draw the c:valAx element.
 func (f *File) drawPlotAreaValAx(formatSet *formatChart) []*cAxs {
 	min := &attrValFloat{Val: formatSet.YAxis.Minimum}
@@ -983,18 +994,26 @@ func (f *File) drawPlotAreaValAx(formatSet *formatChart) []*cAxs {
 	if formatSet.YAxis.Maximum == 0 {
 		max = nil
 	}
+
+	numFmt := "General"
+	if formatSet.YAxis.NumFormat != "" {
+		numFmt = formatSet.YAxis.NumFormat
+	} else if formatSet.Type != "" {
+		numFmt = formatSet.Type
+	}
+
 	return []*cAxs{
 		{
 			AxID: &attrValInt{Val: 753999904},
 			Scaling: &cScaling{
-				Orientation: &attrValString{Val: orientation[formatSet.YAxis.ReverseOrder]},
+				Orientation: &attrValString{Val: orientation[formatSet.YAxis.ReverseOrder]}, // "minMax"
 				Max:         max,
 				Min:         min,
 			},
 			Delete: &attrValBool{Val: false},
 			AxPos:  &attrValString{Val: valAxPos[formatSet.YAxis.ReverseOrder]},
 			NumFmt: &cNumFmt{
-				FormatCode:   chartValAxNumFmtFormatCode[formatSet.Type],
+				FormatCode:   chartValAxNumFmtFormatCode[numFmt],
 				SourceLinked: true,
 			},
 			MajorTickMark: &attrValString{Val: "none"},

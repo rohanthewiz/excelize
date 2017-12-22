@@ -115,7 +115,7 @@ type aPPr struct {
 // specifies a solid color fill. The shape is filled entirely with the specified
 // color.
 type aSolidFill struct {
-	SchemeClr *aSchemeClr    `xml:"a:schemeClr"`
+	SchemeClr *aSchemeClr    `xml:"a:schemeClr,omitempty"`
 	SrgbClr   *attrValString `xml:"a:srgbClr"`
 }
 
@@ -327,6 +327,7 @@ type cAxs struct {
 	Delete        *attrValBool   `xml:"c:delete"`
 	AxPos         *attrValString `xml:"c:axPos"`
 	NumFmt        *cNumFmt       `xml:"c:numFmt"`
+	DisplayUnits  *cDisplayUnits `xml:"c:dispUnits,omitempty"`
 	MajorTickMark *attrValString `xml:"c:majorTickMark"`
 	MinorTickMark *attrValString `xml:"c:minorTickMark"`
 	TickLblPos    *attrValString `xml:"c:tickLblPos"`
@@ -354,6 +355,15 @@ type cScaling struct {
 type cNumFmt struct {
 	FormatCode   string `xml:"formatCode,attr"`
 	SourceLinked bool   `xml:"sourceLinked,attr"`
+}
+
+// cDisplayUnits directly maps to c:dispUnits element.
+// This element alters the scale of units on an axis
+// BuiltInUnit is an Excel unit of scale and can be "millions", "thousands", etc.
+// DisplayUnitsLabel when empty will cause the label for the BuiltInUnit not to display
+type cDisplayUnits struct {
+	BuiltInUnit       *attrValString `xml:"c:builtInUnit"`
+	DisplayUnitsLabel string         `xml:"c:dispUnitsLbl,omitempty"`
 }
 
 // cSer directly maps the c:ser element. This element specifies a series on a
@@ -484,19 +494,19 @@ type cPageMargins struct {
 
 // formatChartAxis directly maps the format settings of the chart axis.
 type formatChartAxis struct {
-	Crossing            string  `json:"crossing"`
-	MajorTickMark       string  `json:"major_tick_mark"`
-	MinorTickMark       string  `json:"minor_tick_mark"`
-	MinorUnitType       string  `json:"minor_unit_type"`
-	MajorUnit           int     `json:"major_unit"`
-	MajorUnitType       string  `json:"major_unit_type"`
-	DisplayUnits        string  `json:"display_units"`
-	DisplayUnitsVisible bool    `json:"display_units_visible"`
-	DateAxis            bool    `json:"date_axis"`
+	Crossing            string `json:"crossing"`
+	MajorTickMark       string `json:"major_tick_mark"`
+	MinorTickMark       string `json:"minor_tick_mark"`
+	MinorUnitType       string `json:"minor_unit_type"`
+	MajorUnit           int    `json:"major_unit"`
+	MajorUnitType       string `json:"major_unit_type"`
+	DisplayUnits        string `json:"display_units"` // 'millions' | 'thousands'
+	DisplayUnitsVisible bool   `json:"display_units_visible"` // label the axis with the display unit?
+	DateAxis            bool   `json:"date_axis"`
 	ReverseOrder        bool    `json:"reverse_order"`
 	Maximum             float64 `json:"maximum"`
 	Minimum             float64 `json:"minimum"`
-	NumFormat           string  `json:"num_format"`
+	NumFormat           string `json:"num_format"`
 	NumFont             struct {
 		Color     string `json:"color"`
 		Bold      bool   `json:"bold"`
@@ -508,13 +518,14 @@ type formatChartAxis struct {
 
 // formatChart directly maps the format settings of the chart.
 type formatChart struct {
-	Type      string              `json:"type"`
-	Series    []formatChartSeries `json:"series"`
-	Format    formatPicture       `json:"format"`
-	Legend    formatChartLegend   `json:"legend"`
-	Title     formatChartTitle    `json:"title"`
-	XAxis     formatChartAxis     `json:"x_axis"`
-	YAxis     formatChartAxis     `json:"y_axis"`
+	Type        string              `json:"type"`
+	Series      []formatChartSeries `json:"series"`
+	ThemeColors []string            `json:"theme_colors"` // custom colors for the chart
+	Format      formatPicture       `json:"format"`
+	Legend      formatChartLegend   `json:"legend"`
+	Title       formatChartTitle    `json:"title"`
+	XAxis       formatChartAxis     `json:"x_axis"`
+	YAxis       formatChartAxis     `json:"y_axis"`
 	Chartarea struct {
 		Border struct {
 			None bool `json:"none"`
