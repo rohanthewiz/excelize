@@ -520,7 +520,7 @@ type formatChartAxis struct {
 type formatChart struct {
 	Type        string              `json:"type"`
 	Series      []formatChartSeries `json:"series"`
-	ThemeColors []string            `json:"theme_colors"` // custom colors for the chart
+	ThemeColors []string            `json:"theme_colors"` // per chart custom colors
 	Format      formatPicture       `json:"format"`
 	Legend      formatChartLegend   `json:"legend"`
 	Title       formatChartTitle    `json:"title"`
@@ -598,6 +598,7 @@ type formatChartSeries struct {
 			None  bool   `json:"none"`
 		} `json:"fill"`
 	} `json:"marker"`
+	Smooth bool `json:"smooth"`
 }
 
 // formatChartTitle directly maps the format settings of the chart title.
