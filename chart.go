@@ -585,6 +585,7 @@ func (f *File) drawChartSeries(formatSet *formatChart) *[]cSer {
 			Val:    f.drawChartSeriesVal(formatSet.Series[k], formatSet),
 			XVal:   f.drawChartSeriesXVal(formatSet.Series[k], formatSet),
 			YVal:   f.drawChartSeriesYVal(formatSet.Series[k], formatSet),
+			Smooth: &attrValBool{Val: formatSet.Series[k].Smooth},
 		})
 	}
 	return &ser
@@ -678,9 +679,13 @@ func (f *File) drawChartSeriesVal(v formatChartSeries, formatSet *formatChart) *
 // drawChartSeriesMarker provides function to draw the c:marker element by given
 // data index and format sets.
 func (f *File) drawChartSeriesMarker(i int, formatSet *formatChart) *cMarker {
+	symbolType := "none"
+	if formatSet.Series[i].Marker.Type != "" {
+		symbolType = formatSet.Series[i].Marker.Type
+	}
 	marker := &cMarker{
-		Symbol: &attrValString{Val: "circle"},
-		Size:   &attrValInt{Val: 5},
+		Symbol: &attrValString{Val: symbolType},
+		Size:   &attrValInt{Val: 3},
 		SpPr: &cSpPr{
 			SolidFill: &aSolidFill{
 				SchemeClr: &aSchemeClr{
@@ -697,7 +702,8 @@ func (f *File) drawChartSeriesMarker(i int, formatSet *formatChart) *cMarker {
 			},
 		},
 	}
-	chartSeriesMarker := map[string]*cMarker{Bar: nil, BarStacked: nil, Bar3D: nil, Doughnut: nil, Line: nil, Pie: nil, Pie3D: nil, Radar: nil, Scatter: marker}
+	chartSeriesMarker := map[string]*cMarker{Bar: nil, BarStacked: nil, Bar3D: nil, Doughnut: nil, Line: marker,
+			Pie: nil, Pie3D: nil, Radar: nil, Scatter: marker}
 	return chartSeriesMarker[formatSet.Type]
 }
 
