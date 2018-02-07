@@ -658,7 +658,7 @@ func (f *File) drawDoughnutChart(formatSet *formatChart) *cPlotArea {
 				Val: true,
 			},
 			Ser:      f.drawChartSeries(formatSet),
-			HoleSize: &attrValInt{Val: 75},
+			HoleSize: &attrValInt{Val: 55},
 		},
 	}
 }
