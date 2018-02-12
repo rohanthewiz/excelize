@@ -594,6 +594,7 @@ type formatChartSeries struct {
 		} `json:"fill"`
 	} `json:"marker"`
 	Smooth bool `json:"smooth"`
+	InvertIfNegative bool `json:"invertIfNegative"`
 }
 
 // formatChartTitle directly maps the format settings of the chart title.

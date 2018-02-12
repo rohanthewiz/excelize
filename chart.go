@@ -586,6 +586,7 @@ func (f *File) drawChartSeries(formatSet *formatChart) *[]cSer {
 			XVal:   f.drawChartSeriesXVal(formatSet.Series[k], formatSet),
 			YVal:   f.drawChartSeriesYVal(formatSet.Series[k], formatSet),
 			Smooth: &attrValBool{Val: formatSet.Series[k].Smooth},
+			InvertIfNegative: &attrValBool{Val: formatSet.Series[k].InvertIfNegative},
 		})
 	}
 	return &ser
