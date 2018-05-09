@@ -12,6 +12,8 @@ import (
 	"unicode/utf8"
 )
 
+const rowsCapacity = 10000
+
 // NewSheet provides function to create a new sheet by given index, when
 // creating a new XLSX file, the default sheet will be create, when you create a
 // new file.
@@ -111,6 +113,8 @@ func (f *File) setContentTypes(index int) {
 // Update sheet property by given index.
 func (f *File) setSheet(index int, name string) {
 	var xlsx xlsxWorksheet
+	rows := make([]xlsxRow, 0, rowsCapacity)
+	xlsx.SheetData.Row = rows
 	xlsx.Dimension.Ref = "A1"
 	xlsx.SheetViews.SheetView = append(xlsx.SheetViews.SheetView, xlsxSheetView{
 		WorkbookViewID: 0,
