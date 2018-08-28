@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/rohanthewiz/excelize"
 )
 
 var _ = []excelize.SheetViewOption{

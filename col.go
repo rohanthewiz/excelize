@@ -275,21 +275,23 @@ func (f *File) RemoveCol(sheet, column string) {
 }
 
 // Completion column element tags of XML in a sheet.
-func completeCol(xlsx *xlsxWorksheet, row, cell int) {
+func completeCol(xlsx *xlsxWorksheet, rowNum, colNum int) {
 	buffer := bytes.Buffer{}
-	for r := range xlsx.SheetData.Row {
-		if len(xlsx.SheetData.Row[r].C) < cell {
-			start := len(xlsx.SheetData.Row[r].C)
-			for iii := start; iii < cell; iii++ {
-				buffer.WriteString(ToAlphaString(iii))
-				buffer.WriteString(strconv.Itoa(r + 1))
-				xlsx.SheetData.Row[r].C = append(xlsx.SheetData.Row[r].C, xlsxC{
-					R: buffer.String(),
-				})
-				buffer.Reset()
-			}
+	r := rowNum - 1
+	//for r := range xlsx.SheetData.Row { // for all rows??!
+	if len(xlsx.SheetData.Row[r].C) < colNum {
+		start := len(xlsx.SheetData.Row[r].C)
+		// Fill with str cell
+		for iii := start; iii < colNum; iii++ {
+			buffer.WriteString(ToAlphaString(iii))
+			buffer.WriteString(strconv.Itoa(r + 1))
+			xlsx.SheetData.Row[r].C = append(xlsx.SheetData.Row[r].C, xlsxC{
+				R: buffer.String(),
+			})
+			buffer.Reset()
 		}
 	}
+	//}
 }
 
 // convertColWidthToPixels provieds function to convert the width of a cell from

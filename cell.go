@@ -380,27 +380,24 @@ func (f *File) prepareCellStyle(xlsx *xlsxWorksheet, col, style int) int {
 	return style
 }
 
-// SetCellStr provides function to set string type value of a cell. Total number
-// of characters that a cell can contain 32767 characters.
-func (f *File) SetCellStr(sheet, axis, value string) {
+// SetCellStr provides a function to set string type value of a cell.
+// Cell max characters is 32767 characters.
+func (f *File) SetCellStr(sheet, strCell, value string) {
 	xlsx := f.workSheetReader(sheet)
-	axis = f.mergeCellsParser(xlsx, axis)
+	strCell = f.mergeCellsParser(xlsx, strCell)
 	if len(value) > 32767 {
 		value = value[0:32767]
 	}
-	col := string(strings.Map(letterOnlyMapF, axis))
-	row, err := strconv.Atoi(strings.Map(intOnlyMapF, axis))
-	if err != nil {
-		return
-	}
+	col := string(strings.Map(letterOnlyMapF, strCell))
+	row, err := strconv.Atoi(strings.Map(intOnlyMapF, strCell))
+	if err != nil { return }
 	xAxis := row - 1
 	yAxis := TitleToNumber(col)
 
-	rows := xAxis + 1
-	cell := yAxis + 1
+	colNum := yAxis + 1
 
-	completeRow(xlsx, rows, cell)
-	completeCol(xlsx, rows, cell)
+	completeRow(xlsx, row, colNum)
+	completeCol(xlsx, row, colNum)
 
 	// Leading space(s) character detection.
 	if len(value) > 0 {
@@ -411,7 +408,7 @@ func (f *File) SetCellStr(sheet, axis, value string) {
 			}
 		}
 	}
-	xlsx.SheetData.Row[xAxis].C[yAxis].S = f.prepareCellStyle(xlsx, cell, xlsx.SheetData.Row[xAxis].C[yAxis].S)
+	xlsx.SheetData.Row[xAxis].C[yAxis].S = f.prepareCellStyle(xlsx, colNum, xlsx.SheetData.Row[xAxis].C[yAxis].S)
 	xlsx.SheetData.Row[xAxis].C[yAxis].T = "str"
 	xlsx.SheetData.Row[xAxis].C[yAxis].V = value
 }
@@ -429,13 +426,12 @@ func (f *File) SetCellDefault(sheet, axis, value string) {
 	xAxis := row - 1
 	yAxis := TitleToNumber(col)
 
-	rows := xAxis + 1
-	cell := yAxis + 1
+	colNum := yAxis + 1
 
-	completeRow(xlsx, rows, cell)
-	completeCol(xlsx, rows, cell)
+	completeRow(xlsx, row, colNum)
+	completeCol(xlsx, row, colNum)
 
-	xlsx.SheetData.Row[xAxis].C[yAxis].S = f.prepareCellStyle(xlsx, cell, xlsx.SheetData.Row[xAxis].C[yAxis].S)
+	xlsx.SheetData.Row[xAxis].C[yAxis].S = f.prepareCellStyle(xlsx, colNum, xlsx.SheetData.Row[xAxis].C[yAxis].S)
 	xlsx.SheetData.Row[xAxis].C[yAxis].T = ""
 	xlsx.SheetData.Row[xAxis].C[yAxis].V = value
 }

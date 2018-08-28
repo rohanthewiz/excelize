@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/rohanthewiz/excelize"
 	"github.com/mohae/deepcopy"
 )
 

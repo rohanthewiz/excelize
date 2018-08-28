@@ -12,6 +12,17 @@ import (
 	"time"
 )
 
+func TestMinWrite(t *testing.T) {
+	xlsx, err := OpenFile("./test/Blankbook.xlsx")
+	if err != nil {
+		t.Log(err)
+	}
+	//xlsx.SetCellValue("Sheet1", "A1", "X")
+	xlsx.SetCellValue("Sheet1", "C1", "X")
+	//xlsx.SetCellValue("Sheet1", "B2", "X")
+	xlsx.SetCellValue("Sheet1", "E1", "Y")
+}
+
 func TestOpenFile(t *testing.T) {
 	// Test update a XLSX file.
 	xlsx, err := OpenFile("./test/Workbook1.xlsx")

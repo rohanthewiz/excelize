@@ -298,24 +298,27 @@ func checkRow(xlsx *xlsxWorksheet) {
 // completeRow provides function to check and fill each column element for a
 // single row and make that is continuous in a worksheet of XML by given row
 // index and axis.
-func completeRow(xlsx *xlsxWorksheet, row, cell int) {
-	currentRows := len(xlsx.SheetData.Row)
-	if currentRows > 1 {
-		lastRow := xlsx.SheetData.Row[currentRows-1].R
-		if lastRow >= row {
-			row = lastRow
+func completeRow(xlsx *xlsxWorksheet, rowNum, colNum int) {
+	numRows := len(xlsx.SheetData.Row)
+
+	if numRows > 1 {
+		lastRow := xlsx.SheetData.Row[numRows-1].R
+		if rowNum < lastRow { // rowNum arg should at least be the last recorded row num (what's recorded when?)
+			rowNum = lastRow
 		}
 	}
-	for i := currentRows; i < row; i++ {
-		xlsx.SheetData.Row = append(xlsx.SheetData.Row, xlsxRow{
-			R: i + 1,
-		})
+	// Add additional rows
+	for i := numRows; i < rowNum; i++ {
+		xlsx.SheetData.Row = append(xlsx.SheetData.Row, xlsxRow{ R: i + 1 })
 	}
+
+
 	buffer := bytes.Buffer{}
-	for ii := currentRows; ii < row; ii++ {
+	for ii := numRows; ii < rowNum; ii++ {
 		start := len(xlsx.SheetData.Row[ii].C)
-		if start == 0 {
-			for iii := start; iii < cell; iii++ {
+		if start == 0 { // optimization: only on empty row
+			// Fill with str cell
+			for iii := start; iii < colNum; iii++ {
 				buffer.WriteString(ToAlphaString(iii))
 				buffer.WriteString(strconv.Itoa(ii + 1))
 				xlsx.SheetData.Row[ii].C = append(xlsx.SheetData.Row[ii].C, xlsxC{

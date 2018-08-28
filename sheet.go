@@ -89,14 +89,17 @@ func (f *File) worksheetWriter() {
 }
 
 // trimCell provides function to trim blank cells which created by completeCol.
-func trimCell(column []xlsxC) []xlsxC {
-	col := []xlsxC{}
+func trimCell(column []xlsxC) (col []xlsxC) {
+	col = make([]xlsxC, len(column))
+	i := 0
 	for _, c := range column {
 		if c.S != 0 || c.V != "" || c.F != nil || c.T != "" {
-			col = append(col, c)
+			col[i] = c
+			i++
+			//col = append(col, c)
 		}
 	}
-	return col
+	return col[0:i]
 }
 
 // Read and update property of contents type of XLSX.
