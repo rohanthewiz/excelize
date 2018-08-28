@@ -23,6 +23,21 @@ func TestMinWrite(t *testing.T) {
 	xlsx.SetCellValue("Sheet1", "E1", "Y")
 }
 
+func BenchmarkMinWrite(b *testing.B) {
+	b.ReportAllocs()
+	xlsx, err := OpenFile("./test/Blankbook.xlsx")
+	if err != nil {
+		b.Log(err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		xlsx.SetCellValue("Sheet1", "C1", "X")
+		xlsx.SetCellValue("Sheet1", "B2", "Y")
+		xlsx.SetCellValue("Sheet1", "C2", "Z")
+		xlsx.SetCellValue("Sheet1", "C1", "A")
+	}
+}
+
 func TestOpenFile(t *testing.T) {
 	// Test update a XLSX file.
 	xlsx, err := OpenFile("./test/Workbook1.xlsx")

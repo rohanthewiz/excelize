@@ -313,18 +313,14 @@ func completeRow(xlsx *xlsxWorksheet, rowNum, colNum int) {
 	}
 
 
-	buffer := bytes.Buffer{}
 	for ii := numRows; ii < rowNum; ii++ {
 		start := len(xlsx.SheetData.Row[ii].C)
 		if start == 0 { // optimization: only on empty row
 			// Fill with str cell
 			for iii := start; iii < colNum; iii++ {
-				buffer.WriteString(ToAlphaString(iii))
-				buffer.WriteString(strconv.Itoa(ii + 1))
 				xlsx.SheetData.Row[ii].C = append(xlsx.SheetData.Row[ii].C, xlsxC{
-					R: buffer.String(),
+					R: ToAlphaString(iii) + strconv.Itoa(ii + 1),
 				})
-				buffer.Reset()
 			}
 		}
 	}
