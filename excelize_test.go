@@ -23,18 +23,55 @@ func TestMinWrite(t *testing.T) {
 	xlsx.SetCellValue("Sheet1", "E1", "Y")
 }
 
-func BenchmarkMinWrite(b *testing.B) {
+func BenchmarkWriteCells(b *testing.B) {
 	b.ReportAllocs()
 	xlsx, err := OpenFile("./test/Blankbook.xlsx")
 	if err != nil {
 		b.Log(err)
 	}
-
 	for i := 0; i < b.N; i++ {
-		xlsx.SetCellValue("Sheet1", "C1", "X")
+		xlsx.SetCellValue("Sheet1", "A1", "X")
+		xlsx.SetCellValue("Sheet1", "B1", "Y")
+		xlsx.SetCellValue("Sheet1", "C1", "Z")
+		xlsx.SetCellValue("Sheet1", "D1", "A")
+		xlsx.SetCellValue("Sheet1", "E1", "X")
+		xlsx.SetCellValue("Sheet1", "F1", "Y")
+		xlsx.SetCellValue("Sheet1", "G1", "Z")
+		xlsx.SetCellValue("Sheet1", "H1", "A")
+
+		xlsx.SetCellValue("Sheet1", "A2", "X")
 		xlsx.SetCellValue("Sheet1", "B2", "Y")
 		xlsx.SetCellValue("Sheet1", "C2", "Z")
-		xlsx.SetCellValue("Sheet1", "C1", "A")
+		xlsx.SetCellValue("Sheet1", "D2", "A")
+		xlsx.SetCellValue("Sheet1", "E2", "X")
+		xlsx.SetCellValue("Sheet1", "F2", "Y")
+		xlsx.SetCellValue("Sheet1", "G2", "Z")
+		xlsx.SetCellValue("Sheet1", "H2", "A")
+	}
+}
+
+func BenchmarkWriteRow(b *testing.B) {
+	b.ReportAllocs()
+	xlsx, err := OpenFile("./test/Blankbook.xlsx")
+	if err != nil {
+		b.Log(err)
+	}
+	for i := 0; i < b.N; i++ {
+		xlsx.WriteRow("Sheet1", "A1", []interface{} {"X", "Y", "Z", "A","X", "Y", "Z", "A"})
+		xlsx.WriteRow("Sheet1", "A2", []interface{} {"X", "Y", "Z", "A", "X", "Y", "Z", "A"})
+	}
+}
+
+func TestWriteRow(t *testing.T) {
+	xlsx, err := OpenFile("./test/Blankbook.xlsx")
+	if err != nil {
+		t.Log(err)
+	}
+	xlsx.WriteRow("Sheet1", "A1", []interface{} {"X", "Y", 26789, "A","X", "Y", time.Now(), "A"})
+	xlsx.WriteRow("Sheet1", "A2", []interface{} {"X", "Y", "Z", "A", 6.5, "Y", "Z", 92})
+	err = xlsx.SaveAs("./test/RowWrite.xlsx")
+	if err != nil {
+		t.Log(err)
 	}
 }
 

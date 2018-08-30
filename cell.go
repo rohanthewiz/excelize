@@ -84,6 +84,71 @@ func (f *File) SetCellValue(sheet, axis string, value interface{}) {
 	}
 }
 
+// Batch function for setting row values starting at cellRef startCell (ex. "B1")
+func (f *File) WriteRow(sheet, startCell string, values []interface{}) {
+	xlsh := f.workSheetReader(sheet)
+
+	rowNum, firstColNum, err := f.CellRowColNum(startCell)
+	if err != nil { return }
+	rowIdx := rowNum - 1
+	strRow := strconv.Itoa(rowNum)
+
+	// Make sure we have additional rows needed for contiguity
+	completeRowsOnly(xlsh, rowNum)
+
+	// Fill row string cell refs up to the last col to be written
+	lastColNum := firstColNum + len(values) - 1
+	completeCol(xlsh, rowNum, lastColNum)
+
+	for i, val := range values {
+		colNum := firstColNum + i
+		colIdx := colNum - 1
+		strCell := ToAlphaString(colNum) + strRow
+		strCell = f.mergeCellsParser(xlsh, strCell)
+
+		switch t := val.(type) {
+		case int:
+			f.SetCellIntForBatch(xlsh, strCell, val.(int), rowIdx, colIdx)
+		case int8:
+			f.SetCellIntForBatch(xlsh, strCell, int(val.(int8)), rowIdx, colIdx)
+		case int16:
+			f.SetCellIntForBatch(xlsh, strCell, int(val.(int16)), rowIdx, colIdx)
+		case int32:
+			f.SetCellIntForBatch(xlsh, strCell, int(val.(int32)), rowIdx, colIdx)
+		case int64:
+			f.SetCellIntForBatch(xlsh, strCell, int(val.(int64)), rowIdx, colIdx)
+		case uint:
+			f.SetCellIntForBatch(xlsh, strCell, int(val.(uint)), rowIdx, colIdx)
+		case uint8:
+			f.SetCellIntForBatch(xlsh, strCell, int(val.(uint8)), rowIdx, colIdx)
+		case uint16:
+			f.SetCellIntForBatch(xlsh, strCell, int(val.(uint16)), rowIdx, colIdx)
+		case uint32:
+			f.SetCellIntForBatch(xlsh, strCell, int(val.(uint32)), rowIdx, colIdx)
+		case uint64:
+			f.SetCellIntForBatch(xlsh, strCell, int(val.(uint64)), rowIdx, colIdx)
+		case float32:
+			f.SetCellDefaultForBatch(xlsh, strCell, strconv.FormatFloat(float64(val.(float32)), 'f', -1, 32),
+					rowIdx, colIdx)
+		case float64:
+			f.SetCellDefaultForBatch(xlsh, strCell, strconv.FormatFloat(float64(val.(float64)), 'f', -1, 64),
+					rowIdx, colIdx)
+		case string:
+			f.SetCellStrForBatch(xlsh, strCell, t, rowIdx, colIdx)
+		case []byte:
+			f.SetCellStrForBatch(xlsh, strCell, string(t), rowIdx, colIdx)
+		case time.Time:
+			f.SetCellDefaultForBatch(xlsh, strCell, strconv.FormatFloat(float64(timeToExcelTime(timeToUTCTime(val.(time.Time)))),
+					'f', -1, 64), rowIdx, colIdx)
+			f.setDefaultTimeStyle(sheet, strCell)
+		case nil:
+			f.SetCellStrForBatch(xlsh, strCell, "", rowIdx, colIdx)
+		default:
+			f.SetCellStrForBatch(xlsh, strCell, fmt.Sprintf("%v", val), rowIdx, colIdx)
+		}
+	}
+}
+
 // GetCellValue provides function to get formatted value from cell by given
 // worksheet name and axis in XLSX file. If it is possible to apply a format to
 // the cell value, it will do so, if not then an error will be returned, along
@@ -367,6 +432,14 @@ func (f *File) SetCellInt(sheet, axis string, value int) {
 	xlsx.SheetData.Row[xAxis].C[yAxis].V = strconv.Itoa(value)
 }
 
+// SetCellIntForBatch (for use with RowWrite()) sets int type value of a cell by given
+// worksheet name, cell coordinates and cell value.
+func (f *File) SetCellIntForBatch(xlsh *xlsxWorksheet, strCell string, value, rowIdx, colIdx int) {
+	xlsh.SheetData.Row[rowIdx].C[colIdx].S = f.prepareCellStyle(xlsh, colIdx + 1, xlsh.SheetData.Row[rowIdx].C[colIdx].S)
+	xlsh.SheetData.Row[rowIdx].C[colIdx].T = ""
+	xlsh.SheetData.Row[rowIdx].C[colIdx].V = strconv.Itoa(value)
+}
+
 // prepareCellStyle provides function to prepare style index of cell in
 // worksheet by given column index and style index.
 func (f *File) prepareCellStyle(xlsx *xlsxWorksheet, col, style int) int {
@@ -413,7 +486,26 @@ func (f *File) SetCellStr(sheet, strCell, value string) {
 	xlsx.SheetData.Row[xAxis].C[yAxis].V = value
 }
 
-// SetCellDefault provides function to set string type value of a cell as
+// For use with RowWrite. Sets cell value to a string type
+// cell max characters is 32767 characters.
+func (f *File) SetCellStrForBatch(xlsh *xlsxWorksheet, strCell, value string, rowIdx, colIdx int) (err error) {
+	if len(value) > 32767 { value = value[0:32767] }
+	// Leading space(s) character detection.
+	if len(value) > 0 {
+		if value[0] == 32 {
+			xlsh.SheetData.Row[rowIdx].C[colIdx].XMLSpace = xml.Attr{
+				Name:  xml.Name{Space: NameSpaceXML, Local: "space"},
+				Value: "preserve",
+			}
+		}
+	}
+	xlsh.SheetData.Row[rowIdx].C[colIdx].S = f.prepareCellStyle(xlsh, colIdx + 1, xlsh.SheetData.Row[rowIdx].C[colIdx].S)
+	xlsh.SheetData.Row[rowIdx].C[colIdx].T = "str"
+	xlsh.SheetData.Row[rowIdx].C[colIdx].V = value
+	return
+}
+
+// Sets string type value of a cell as
 // default format without escaping the cell.
 func (f *File) SetCellDefault(sheet, axis, value string) {
 	xlsx := f.workSheetReader(sheet)
@@ -425,7 +517,6 @@ func (f *File) SetCellDefault(sheet, axis, value string) {
 	}
 	xAxis := row - 1
 	yAxis := TitleToNumber(col)
-
 	colNum := yAxis + 1
 
 	completeRow(xlsx, row, colNum)
@@ -434,6 +525,22 @@ func (f *File) SetCellDefault(sheet, axis, value string) {
 	xlsx.SheetData.Row[xAxis].C[yAxis].S = f.prepareCellStyle(xlsx, colNum, xlsx.SheetData.Row[xAxis].C[yAxis].S)
 	xlsx.SheetData.Row[xAxis].C[yAxis].T = ""
 	xlsx.SheetData.Row[xAxis].C[yAxis].V = value
+}
+
+// For use with RowWrite(). Set string type value of a cell as default format without escaping the cell.
+func (f *File) SetCellDefaultForBatch(xlsx *xlsxWorksheet, strCell, value string, rowIdx, colIdx int) {
+	xlsx.SheetData.Row[rowIdx].C[colIdx].S = f.prepareCellStyle(xlsx, colIdx + 1, xlsx.SheetData.Row[rowIdx].C[colIdx].S)
+	xlsx.SheetData.Row[rowIdx].C[colIdx].T = ""
+	xlsx.SheetData.Row[rowIdx].C[colIdx].V = value
+}
+
+// Return unity-based row and column numbers from string cell reference
+// Example: CellRowColNum("B3") //=> 3, 2
+func (f *File) CellRowColNum(strCellRef string) (rowNum, colNum int, err error) {
+	strCol := string(strings.Map(letterOnlyMapF, strCellRef))
+	row, err := strconv.Atoi(strings.Map(intOnlyMapF, strCellRef))
+	if err != nil { return }
+	return row, TitleToNumber(strCol) + 1, err
 }
 
 // checkCellInArea provides function to determine if a given coordinate is

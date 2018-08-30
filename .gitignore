@@ -1,1 +1,7 @@
 .idea/
+
+profile.cpu.svg
+profile_cpu.out
+test/RowWrite.xlsx
+
+*.exe

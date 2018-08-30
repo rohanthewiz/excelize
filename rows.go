@@ -326,6 +326,15 @@ func completeRow(xlsx *xlsxWorksheet, rowNum, colNum int) {
 	}
 }
 
+// completeRow ensures contiguous rows to the given rowNum.
+// This is likely safe only for contiguous data, but is lean and fast
+func completeRowsOnly(xlsx *xlsxWorksheet, rowNum int) {
+	numRows := len(xlsx.SheetData.Row)
+	for i := numRows; i < rowNum; i++ {
+		xlsx.SheetData.Row = append(xlsx.SheetData.Row, xlsxRow{ R: i + 1 })
+	}
+}
+
 // convertRowHeightToPixels provides function to convert the height of a cell
 // from user's units to pixels. If the height hasn't been set by the user we use
 // the default value. If the row is hidden it has a value of zero.
