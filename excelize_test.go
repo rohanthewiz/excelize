@@ -50,6 +50,42 @@ func BenchmarkWriteCells(b *testing.B) {
 	}
 }
 
+func BenchmarkStyleCells(b *testing.B) {
+	b.ReportAllocs()
+	xlsx, err := OpenFile("./test/Blankbook.xlsx")
+	if err != nil {
+		b.Log(err)
+	}
+
+	// Test set border and solid style pattern fill for a single cell.
+	style, err := xlsx.NewStyle(`{"border":[{"type":"left","color":"0000FF","style":8},{"type":"top","color":"00FF00","style":9},{"type":"bottom","color":"FFFF00","style":10},{"type":"right","color":"FF0000","style":11},{"type":"diagonalDown","color":"A020F0","style":12},{"type":"diagonalUp","color":"A020F0","style":13}],"fill":{"type":"pattern","color":["#E0EBF5"],"pattern":1}}`)
+	if err != nil {
+		b.Log(err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		xlsx.SetCellStyle("Sheet1", "O22", "O22", style)
+	}
+}
+
+func BenchmarkStyleCellsFast(b *testing.B) {
+	b.ReportAllocs()
+	xlsx, err := OpenFile("./test/Blankbook.xlsx")
+	if err != nil {
+		b.Log(err)
+	}
+
+	// Test set border and solid style pattern fill for a single cell.
+	style, err := xlsx.NewStyle(`{"border":[{"type":"left","color":"0000FF","style":8},{"type":"top","color":"00FF00","style":9},{"type":"bottom","color":"FFFF00","style":10},{"type":"right","color":"FF0000","style":11},{"type":"diagonalDown","color":"A020F0","style":12},{"type":"diagonalUp","color":"A020F0","style":13}],"fill":{"type":"pattern","color":["#E0EBF5"],"pattern":1}}`)
+	if err != nil {
+		b.Log(err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		xlsx.SetCellStyle("Sheet1", "O22", "O22", style, true)
+	}
+}
+
 func BenchmarkWriteRow(b *testing.B) {
 	b.ReportAllocs()
 	xlsx, err := OpenFile("./test/Blankbook.xlsx")

@@ -2286,7 +2286,7 @@ func setCellXfs(style *xlsxStyleSheet, fontID, numFmtID, fillID, borderID int, a
 //    }
 //    xlsx.SetCellStyle("Sheet1", "H9", "H9", style)
 //
-func (f *File) SetCellStyle(sheet, hcell, vcell string, styleID int) {
+func (f *File) SetCellStyle(sheet, hcell, vcell string, styleID int, params ...bool) {
 	hcell = strings.ToUpper(hcell)
 	vcell = strings.ToUpper(vcell)
 
@@ -2323,7 +2323,11 @@ func (f *File) SetCellStyle(sheet, hcell, vcell string, styleID int) {
 
 	xlsx := f.workSheetReader(sheet)
 
-	completeRow(xlsx, vyAxis+1, vxAxis+1)
+	if len(params) > 0 && params[0] { // fast
+		completeRowsOnly(xlsx, vyAxis+1)
+	} else {
+		completeRow(xlsx, vyAxis+1, vxAxis+1)
+	}
 	completeCol(xlsx, vyAxis+1, vxAxis+1)
 
 	for r, row := range xlsx.SheetData.Row {
