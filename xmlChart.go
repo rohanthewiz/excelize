@@ -506,6 +506,8 @@ type formatChartAxis struct {
 	NumFormat           string `json:"num_format"`
 	NumFont             struct {
 		Color     string `json:"color"`
+		LumMin string `json:"lumMin"`
+		LumMax string `json:"lumMax"`
 		Bold      bool   `json:"bold"`
 		Italic    bool   `json:"italic"`
 		Underline bool   `json:"underline"`

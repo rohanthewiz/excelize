@@ -3,6 +3,7 @@ package excelize
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -96,11 +97,17 @@ func parseFormatChartSet(formatSet string) *formatChart {
 			Name: " ",
 		},
 		ShowBlanksAs: "gap",
-		//XAxis:
 	}
 	format.YAxis.NumFont.Color = "tx1" // Todo verify color here
+	format.YAxis.NumFont.LumMin = "50000" // Todo make sure these options passed to 'drawPlotAreaTxPr'
+	format.YAxis.NumFont.LumMax = "50000"
 
-	json.Unmarshal([]byte(formatSet), &format)
+	err := json.Unmarshal([]byte(formatSet), &format)
+	if err != nil {
+		fmt.Println("Error unmarshalling chart format options in parseFormatChartSet - ", err)
+	}
+
+	fmt.Printf("formatSet: %#v\n", format)
 	return &format
 }
 
@@ -816,6 +823,7 @@ func (f *File) drawPlotAreaValAx(formatSet *formatChart) []*cAxs {
 	}
 	// Any one set will set both
 	if formatSet.YAxis.Scaling.Min != "" || formatSet.YAxis.Scaling.Max != ""  {
+		fmt.Println("Setting scaling:", formatSet.YAxis.Scaling.Min, " - ", formatSet.YAxis.Scaling.Max)
 		cAx.Scaling.Min = &attrValString{Val: formatSet.YAxis.Scaling.Min}
 		cAx.Scaling.Max = &attrValString{Val: formatSet.YAxis.Scaling.Max}
 	}
@@ -854,6 +862,7 @@ func (f *File) drawPlotAreaSpPr() *cSpPr {
 }
 
 // drawPlotAreaTxPr provides function to draw the c:txPr element.
+// Todo - Pass set of options here
 func (f *File) drawPlotAreaTxPr(schemeColor string) *cTxPr {
 	return &cTxPr{
 		BodyPr: aBodyPr{
@@ -878,8 +887,8 @@ func (f *File) drawPlotAreaTxPr(schemeColor string) *cTxPr {
 					SolidFill: &aSolidFill{
 						SchemeClr: &aSchemeClr{
 							Val: schemeColor,
-							LumMod: &attrValInt{Val: 15000},
-							LumOff: &attrValInt{Val: 85000},
+							LumMod: &attrValInt{Val: 50000}, // 15000
+							LumOff: &attrValInt{Val: 50000}, // 85000
 						},
 					},
 					Latin: &aLatin{Typeface: "+mn-lt"},
