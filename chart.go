@@ -3,6 +3,7 @@ package excelize
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -77,6 +78,7 @@ var (
 // parseFormatChartSet provides function to parse the format settings of the
 // chart with default value.
 func parseFormatChartSet(formatSet string) *formatChart {
+	// Build an initial format
 	format := formatChart{
 		Format: formatPicture{
 			FPrintsWithSheet: true,
@@ -96,7 +98,16 @@ func parseFormatChartSet(formatSet string) *formatChart {
 		},
 		ShowBlanksAs: "gap",
 	}
-	json.Unmarshal([]byte(formatSet), &format)
+	format.YAxis.NumFont.Color = "tx1" // Todo verify color here
+	format.YAxis.NumFont.LumMin = "50000" // Todo make sure these options passed to 'drawPlotAreaTxPr'
+	format.YAxis.NumFont.LumMax = "50000"
+
+	err := json.Unmarshal([]byte(formatSet), &format)
+	if err != nil {
+		fmt.Println("Error unmarshalling chart format options in parseFormatChartSet - ", err)
+	}
+
+	//fmt.Printf("formatSet: %#v\n", format)
 	return &format
 }
 
@@ -286,11 +297,11 @@ func (f *File) addChart(formatSet *formatChart) {
 									SolidFill: &aSolidFill{
 										SchemeClr: &aSchemeClr{
 											Val: "tx1",
-											LumMod: &attrValInt{
-												Val: 65000,
+											LumMod: &attrValString{
+												Val: "65000",
 											},
-											LumOff: &attrValInt{
-												Val: 35000,
+											LumOff: &attrValString{
+												Val: "35000",
 											},
 										},
 									},
@@ -367,11 +378,11 @@ func (f *File) addChart(formatSet *formatChart) {
 				Algn: "ctr",
 				SolidFill: &aSolidFill{
 					SchemeClr: &aSchemeClr{Val: "tx1",
-						LumMod: &attrValInt{
-							Val: 15000,
+						LumMod: &attrValString{
+							Val: "15000",
 						},
-						LumOff: &attrValInt{
-							Val: 85000,
+						LumOff: &attrValString{
+							Val: "85000",
 						},
 					},
 				},
@@ -686,7 +697,7 @@ func (f *File) drawChartSeriesMarker(i int, formatSet *formatChart) *cMarker {
 	}
 	marker := &cMarker{
 		Symbol: &attrValString{Val: symbolType},
-		Size:   &attrValInt{Val: 3},
+		Size:   &attrValString{Val: "4"}, // Todo - pass this in // 4 is the minimum size that renders correctly
 		SpPr: &cSpPr{
 			SolidFill: &aSolidFill{
 				SchemeClr: &aSchemeClr{
@@ -761,6 +772,7 @@ func (f *File) drawPlotAreaCatAx() []*cAxs {
 			AxID: &attrValInt{Val: 754001152},
 			Scaling: &cScaling{
 				Orientation: &attrValString{Val: "minMax"},
+				// Todo min and max!
 			},
 			Delete: &attrValBool{Val: false},
 			AxPos:  &attrValString{Val: "b"},
@@ -772,7 +784,7 @@ func (f *File) drawPlotAreaCatAx() []*cAxs {
 			MinorTickMark: &attrValString{Val: "none"},
 			TickLblPos:    &attrValString{Val: "nextTo"},
 			SpPr:          f.drawPlotAreaSpPr(),
-			TxPr:          f.drawPlotAreaTxPr(),
+			TxPr:          f.drawPlotAreaTxPr("tx2"),
 			CrossAx:       &attrValInt{Val: 753999904},
 			Crosses:       &attrValString{Val: "autoZero"},
 			Auto:          &attrValBool{Val: true},
@@ -804,11 +816,19 @@ func (f *File) drawPlotAreaValAx(formatSet *formatChart) []*cAxs {
 		MinorTickMark: &attrValString{Val: "none"},
 		TickLblPos:    &attrValString{Val: "nextTo"},
 		SpPr:          f.drawPlotAreaSpPr(),
-		TxPr:          f.drawPlotAreaTxPr(),
+		TxPr:          f.drawPlotAreaTxPr("tx2"),
 		CrossAx:       &attrValInt{Val: 754001152},
 		Crosses:       &attrValString{Val: "autoZero"},
 		CrossBetween:  &attrValString{Val: "between"},
 	}
+
+	if formatSet.YAxis.Scaling.Min != ""  {
+		cAx.Scaling.Min = &attrValString{Val: formatSet.YAxis.Scaling.Min}
+	}
+	if formatSet.YAxis.Scaling.Max != "" {
+		cAx.Scaling.Max = &attrValString{Val: formatSet.YAxis.Scaling.Max}
+	}
+
 	if formatSet.YAxis.DisplayUnits != "" {
 		displayUnitsLabel := ""
 		if formatSet.YAxis.DisplayUnitsVisible {
@@ -819,6 +839,7 @@ func (f *File) drawPlotAreaValAx(formatSet *formatChart) []*cAxs {
 				DisplayUnitsLabel: displayUnitsLabel,
 		}
 	}
+
 	return []*cAxs{cAx}
 }
 
@@ -833,8 +854,8 @@ func (f *File) drawPlotAreaSpPr() *cSpPr {
 			SolidFill: &aSolidFill{
 				SchemeClr: &aSchemeClr{
 					Val:    "tx1",
-					LumMod: &attrValInt{Val: 15000},
-					LumOff: &attrValInt{Val: 85000},
+					LumMod: &attrValString{Val: "15000"},
+					LumOff: &attrValString{Val: "85000"},
 				},
 			},
 		},
@@ -842,7 +863,8 @@ func (f *File) drawPlotAreaSpPr() *cSpPr {
 }
 
 // drawPlotAreaTxPr provides function to draw the c:txPr element.
-func (f *File) drawPlotAreaTxPr() *cTxPr {
+// Todo - Pass set of options here
+func (f *File) drawPlotAreaTxPr(schemeColor string) *cTxPr {
 	return &cTxPr{
 		BodyPr: aBodyPr{
 			Rot:              -60000000,
@@ -865,9 +887,9 @@ func (f *File) drawPlotAreaTxPr() *cTxPr {
 					Baseline: 0,
 					SolidFill: &aSolidFill{
 						SchemeClr: &aSchemeClr{
-							Val:    "tx1",
-							LumMod: &attrValInt{Val: 15000},
-							LumOff: &attrValInt{Val: 85000},
+							Val: schemeColor,
+							LumMod: &attrValString{Val: "60000"}, // 15000
+							LumOff: &attrValString{Val: "40000"}, // 85000
 						},
 					},
 					Latin: &aLatin{Typeface: "+mn-lt"},
