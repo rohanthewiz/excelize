@@ -126,7 +126,7 @@ type aSolidFill struct {
 type aSchemeClr struct {
 	Val    string      `xml:"val,attr,omitempty"`
 	LumMod *attrValInt `xml:"a:lumMod"`
-	LumOff *attrValInt `xml:"a:lumOff"`
+	LumOff *attrValInt `xml:"a:lumOff,omitempty"`
 }
 
 // attrValInt directly maps the val element with integer data type as an
@@ -346,6 +346,8 @@ type cAxs struct {
 // additional axis settings.
 type cScaling struct {
 	Orientation *attrValString `xml:"c:orientation"`
+	Max *attrValString `xml:"c:max"`
+	Min *attrValString `xml:"c:min"`
 }
 
 // cNumFmt (Numbering Format) directly maps the c:numFmt element. This element
@@ -509,6 +511,10 @@ type formatChartAxis struct {
 		Underline bool   `json:"underline"`
 	} `json:"num_font"`
 	NameLayout formatLayout `json:"name_layout"`
+	Scaling struct {
+		Min string `json:"min"`
+		Max string `json:"max"`
+	} `json:"scaling"`
 }
 
 // formatChart directly maps the format settings of the chart.

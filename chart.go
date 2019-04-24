@@ -77,6 +77,7 @@ var (
 // parseFormatChartSet provides function to parse the format settings of the
 // chart with default value.
 func parseFormatChartSet(formatSet string) *formatChart {
+	// Build an initial format
 	format := formatChart{
 		Format: formatPicture{
 			FPrintsWithSheet: true,
@@ -95,7 +96,10 @@ func parseFormatChartSet(formatSet string) *formatChart {
 			Name: " ",
 		},
 		ShowBlanksAs: "gap",
+		//XAxis:
 	}
+	format.YAxis.NumFont.Color = "tx1" // Todo verify color here
+
 	json.Unmarshal([]byte(formatSet), &format)
 	return &format
 }
@@ -761,6 +765,7 @@ func (f *File) drawPlotAreaCatAx() []*cAxs {
 			AxID: &attrValInt{Val: 754001152},
 			Scaling: &cScaling{
 				Orientation: &attrValString{Val: "minMax"},
+				// Todo min and max!
 			},
 			Delete: &attrValBool{Val: false},
 			AxPos:  &attrValString{Val: "b"},
@@ -772,7 +777,7 @@ func (f *File) drawPlotAreaCatAx() []*cAxs {
 			MinorTickMark: &attrValString{Val: "none"},
 			TickLblPos:    &attrValString{Val: "nextTo"},
 			SpPr:          f.drawPlotAreaSpPr(),
-			TxPr:          f.drawPlotAreaTxPr(),
+			TxPr:          f.drawPlotAreaTxPr("tx1"), // TODO - pass in scheme color ("tx1" here)
 			CrossAx:       &attrValInt{Val: 753999904},
 			Crosses:       &attrValString{Val: "autoZero"},
 			Auto:          &attrValBool{Val: true},
@@ -804,11 +809,17 @@ func (f *File) drawPlotAreaValAx(formatSet *formatChart) []*cAxs {
 		MinorTickMark: &attrValString{Val: "none"},
 		TickLblPos:    &attrValString{Val: "nextTo"},
 		SpPr:          f.drawPlotAreaSpPr(),
-		TxPr:          f.drawPlotAreaTxPr(),
+		TxPr:          f.drawPlotAreaTxPr("tx1"),// TODO - pass in scheme color ("tx1" here)
 		CrossAx:       &attrValInt{Val: 754001152},
 		Crosses:       &attrValString{Val: "autoZero"},
 		CrossBetween:  &attrValString{Val: "between"},
 	}
+	// Any one set will set both
+	if formatSet.YAxis.Scaling.Min != "" || formatSet.YAxis.Scaling.Max != ""  {
+		cAx.Scaling.Min = &attrValString{Val: formatSet.YAxis.Scaling.Min}
+		cAx.Scaling.Max = &attrValString{Val: formatSet.YAxis.Scaling.Max}
+	}
+
 	if formatSet.YAxis.DisplayUnits != "" {
 		displayUnitsLabel := ""
 		if formatSet.YAxis.DisplayUnitsVisible {
@@ -819,6 +830,7 @@ func (f *File) drawPlotAreaValAx(formatSet *formatChart) []*cAxs {
 				DisplayUnitsLabel: displayUnitsLabel,
 		}
 	}
+
 	return []*cAxs{cAx}
 }
 
@@ -842,7 +854,7 @@ func (f *File) drawPlotAreaSpPr() *cSpPr {
 }
 
 // drawPlotAreaTxPr provides function to draw the c:txPr element.
-func (f *File) drawPlotAreaTxPr() *cTxPr {
+func (f *File) drawPlotAreaTxPr(schemeColor string) *cTxPr {
 	return &cTxPr{
 		BodyPr: aBodyPr{
 			Rot:              -60000000,
@@ -865,7 +877,7 @@ func (f *File) drawPlotAreaTxPr() *cTxPr {
 					Baseline: 0,
 					SolidFill: &aSolidFill{
 						SchemeClr: &aSchemeClr{
-							Val:    "tx1",
+							Val: schemeColor,
 							LumMod: &attrValInt{Val: 15000},
 							LumOff: &attrValInt{Val: 85000},
 						},
