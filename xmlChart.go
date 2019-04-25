@@ -125,8 +125,8 @@ type aSolidFill struct {
 // base color defined.
 type aSchemeClr struct {
 	Val    string      `xml:"val,attr,omitempty"`
-	LumMod *attrValInt `xml:"a:lumMod"`
-	LumOff *attrValInt `xml:"a:lumOff,omitempty"`
+	LumMod *attrValString `xml:"a:lumMod"`
+	LumOff *attrValString `xml:"a:lumOff,omitempty"`
 }
 
 // attrValInt directly maps the val element with integer data type as an

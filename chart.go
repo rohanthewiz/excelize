@@ -297,11 +297,11 @@ func (f *File) addChart(formatSet *formatChart) {
 									SolidFill: &aSolidFill{
 										SchemeClr: &aSchemeClr{
 											Val: "tx1",
-											LumMod: &attrValInt{
-												Val: 65000,
+											LumMod: &attrValString{
+												Val: "65000",
 											},
-											LumOff: &attrValInt{
-												Val: 35000,
+											LumOff: &attrValString{
+												Val: "35000",
 											},
 										},
 									},
@@ -378,11 +378,11 @@ func (f *File) addChart(formatSet *formatChart) {
 				Algn: "ctr",
 				SolidFill: &aSolidFill{
 					SchemeClr: &aSchemeClr{Val: "tx1",
-						LumMod: &attrValInt{
-							Val: 15000,
+						LumMod: &attrValString{
+							Val: "15000",
 						},
-						LumOff: &attrValInt{
-							Val: 85000,
+						LumOff: &attrValString{
+							Val: "85000",
 						},
 					},
 				},
@@ -853,8 +853,8 @@ func (f *File) drawPlotAreaSpPr() *cSpPr {
 			SolidFill: &aSolidFill{
 				SchemeClr: &aSchemeClr{
 					Val:    "tx1",
-					LumMod: &attrValInt{Val: 15000},
-					LumOff: &attrValInt{Val: 85000},
+					LumMod: &attrValString{Val: "15000"},
+					LumOff: &attrValString{Val: "85000"},
 				},
 			},
 		},
@@ -886,9 +886,9 @@ func (f *File) drawPlotAreaTxPr(schemeColor string) *cTxPr {
 					Baseline: 0,
 					SolidFill: &aSolidFill{
 						SchemeClr: &aSchemeClr{
-							Val: schemeColor,
-							LumMod: &attrValInt{Val: 50000}, // 15000
-							LumOff: &attrValInt{Val: 50000}, // 85000
+							Val: "tx2", // schemeColor,
+							LumMod: &attrValString{Val: "60000"}, // 15000
+							LumOff: &attrValString{Val: "40000"}, // 85000
 						},
 					},
 					Latin: &aLatin{Typeface: "+mn-lt"},
