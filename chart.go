@@ -107,7 +107,7 @@ func parseFormatChartSet(formatSet string) *formatChart {
 		fmt.Println("Error unmarshalling chart format options in parseFormatChartSet - ", err)
 	}
 
-	fmt.Printf("formatSet: %#v\n", format)
+	//fmt.Printf("formatSet: %#v\n", format)
 	return &format
 }
 
