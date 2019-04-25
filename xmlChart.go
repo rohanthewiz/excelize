@@ -388,7 +388,7 @@ type cSer struct {
 // data marker.
 type cMarker struct {
 	Symbol *attrValString `xml:"c:symbol"`
-	Size   *attrValInt    `xml:"c:size"`
+	Size   *attrValString `xml:"c:size"`
 	SpPr   *cSpPr         `xml:"c:spPr"`
 }
 

@@ -697,7 +697,7 @@ func (f *File) drawChartSeriesMarker(i int, formatSet *formatChart) *cMarker {
 	}
 	marker := &cMarker{
 		Symbol: &attrValString{Val: symbolType},
-		Size:   &attrValInt{Val: 3},
+		Size:   &attrValString{Val: "4"}, // Todo - pass this in // 4 is the minimum size that renders correctly
 		SpPr: &cSpPr{
 			SolidFill: &aSolidFill{
 				SchemeClr: &aSchemeClr{
