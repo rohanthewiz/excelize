@@ -784,7 +784,7 @@ func (f *File) drawPlotAreaCatAx() []*cAxs {
 			MinorTickMark: &attrValString{Val: "none"},
 			TickLblPos:    &attrValString{Val: "nextTo"},
 			SpPr:          f.drawPlotAreaSpPr(),
-			TxPr:          f.drawPlotAreaTxPr("tx1"), // TODO - pass in scheme color ("tx1" here)
+			TxPr:          f.drawPlotAreaTxPr("tx2"),
 			CrossAx:       &attrValInt{Val: 753999904},
 			Crosses:       &attrValString{Val: "autoZero"},
 			Auto:          &attrValBool{Val: true},
@@ -816,15 +816,16 @@ func (f *File) drawPlotAreaValAx(formatSet *formatChart) []*cAxs {
 		MinorTickMark: &attrValString{Val: "none"},
 		TickLblPos:    &attrValString{Val: "nextTo"},
 		SpPr:          f.drawPlotAreaSpPr(),
-		TxPr:          f.drawPlotAreaTxPr("tx1"),// TODO - pass in scheme color ("tx1" here)
+		TxPr:          f.drawPlotAreaTxPr("tx2"),
 		CrossAx:       &attrValInt{Val: 754001152},
 		Crosses:       &attrValString{Val: "autoZero"},
 		CrossBetween:  &attrValString{Val: "between"},
 	}
-	// Any one set will set both
-	if formatSet.YAxis.Scaling.Min != "" || formatSet.YAxis.Scaling.Max != ""  {
-		fmt.Println("Setting scaling:", formatSet.YAxis.Scaling.Min, " - ", formatSet.YAxis.Scaling.Max)
+
+	if formatSet.YAxis.Scaling.Min != ""  {
 		cAx.Scaling.Min = &attrValString{Val: formatSet.YAxis.Scaling.Min}
+	}
+	if formatSet.YAxis.Scaling.Max != "" {
 		cAx.Scaling.Max = &attrValString{Val: formatSet.YAxis.Scaling.Max}
 	}
 
@@ -886,7 +887,7 @@ func (f *File) drawPlotAreaTxPr(schemeColor string) *cTxPr {
 					Baseline: 0,
 					SolidFill: &aSolidFill{
 						SchemeClr: &aSchemeClr{
-							Val: "tx2", // schemeColor,
+							Val: schemeColor,
 							LumMod: &attrValString{Val: "60000"}, // 15000
 							LumOff: &attrValString{Val: "40000"}, // 85000
 						},
