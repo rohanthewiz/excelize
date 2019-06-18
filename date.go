@@ -15,7 +15,7 @@ func timeToUTCTime(t time.Time) time.Time {
 
 // timeToExcelTime provides function to convert time to Excel time.
 func timeToExcelTime(t time.Time) float64 {
-	return float64(t.UnixNano())/8.64e13 + 25569.0
+	return float64(t.Unix())/(24*60*60) + 25569.0
 }
 
 // shiftJulianToNoon provides function to process julian date to noon.
