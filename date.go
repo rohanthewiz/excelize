@@ -2,7 +2,6 @@ package excelize
 
 import (
 	"math"
-	"math/big"
 	"time"
 )
 
@@ -16,13 +15,7 @@ func timeToUTCTime(t time.Time) time.Time {
 
 // timeToExcelTime provides function to convert time to Excel time.
 func timeToExcelTime(t time.Time) float64 {
-	nsPerDay := big.NewFloat(8.64e13)
-	tNano := new(big.Float).SetPrec(128).SetInt64(t.UnixNano())
-	result := new(big.Float)
-
-	result.Quo(tNano, nsPerDay)
-	quo, _ := result.Float64()
-	return quo + float64(25569.0)
+	return float64(t.Unix())/(24*60*60) + 25569.0
 }
 
 // shiftJulianToNoon provides function to process julian date to noon.
